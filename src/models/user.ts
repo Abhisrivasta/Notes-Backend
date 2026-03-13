@@ -1,11 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-interface IUser extends Document {
-  name: string
-  email: string
-  password: string
-  role: "user" | "guest"
-}
+import mongoose, { Schema } from "mongoose";
+import type { IUser } from "../types/user.types.js"
 
 const userSchema: Schema<IUser> = new Schema(
 {
@@ -19,12 +13,15 @@ const userSchema: Schema<IUser> = new Schema(
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, "Please use a valid email"]
   },
 
   password: {
     type: String,
     required: true,
+    minlength: 6,
     select: false
   },
 
@@ -32,6 +29,11 @@ const userSchema: Schema<IUser> = new Schema(
     type: String,
     enum: ["user", "guest"],
     default: "user"
+  },
+
+  isActive: {
+    type: Boolean,
+    default: true
   }
 
 },
