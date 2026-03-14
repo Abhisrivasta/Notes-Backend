@@ -1,6 +1,9 @@
 import express from 'express';
-
+import { connectDB } from './config/config';
 const app = express();
+
+
+connectDB();
 const PORT = 3000;
 
 
