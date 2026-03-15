@@ -1,40 +1,17 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose"
 import type { IUser } from "../types/user.types"
 
 const userSchema = new Schema<IUser>(
   {
-    name: {
+    clerkId: {
       type: String,
       required: true,
-      trim: true
-    },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true
-    },
-
-    password: {
-      type: String,
-      required: true
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true
+      unique: true
     },
 
     isPremium: {
       type: Boolean,
       default: false
-    },
-
-    notesCount: {
-      type: Number,
-      default: 0
     },
 
     premiumExpiresAt: {
@@ -52,4 +29,4 @@ const userSchema = new Schema<IUser>(
   }
 )
 
-export default mongoose.model<IUser>("User", userSchema);
+export const User =  mongoose.model<IUser>("User", userSchema)
