@@ -1,8 +1,15 @@
-import { Document } from "mongoose"
+import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
-  clerkId: string
-  isPremium?: boolean
-  premiumExpiresAt?: Date
-  role: "user" | "guest"
+  _id: Types.ObjectId; 
+
+  clerkId: string;
+
+  isPremium: boolean;
+  premiumExpiresAt?: Date;
+
+  role: "user" | "guest";
+
+  createdAt: Date;
+  updatedAt: Date;
 }

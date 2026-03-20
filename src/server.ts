@@ -1,18 +1,38 @@
-import express from 'express';
-import { connectDB } from './config/config';
-import { clerkMiddleware } from '@clerk/express';
+import express from "express";
+import dotenv from "dotenv";
+import { connectDB } from "./config/config";
+import { clerkMiddleware } from "@clerk/express";
+import notesRoutes from "./routes/note.routes";
+
+// Load env FIRST
+dotenv.config();
+
 const app = express();
 
+// Middleware
+app.use(express.json());
+app.use(clerkMiddleware());
 
-connectDB();
-const PORT = 3000;
+// Routes
+app.use("/api/notes", notesRoutes);
 
-app.use(clerkMiddleware())
-
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Start server ONLY after DB connects
+const PORT = process.env.PORT || 3000;
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -1,5 +1,5 @@
-import mongoose, { Schema } from "mongoose"
-import type { INote } from "../types/notes.types"
+import mongoose, { Schema } from "mongoose";
+import type { INote } from "../types/notes.types";
 
 const noteSchema = new Schema<INote>(
   {
@@ -16,7 +16,8 @@ const noteSchema = new Schema<INote>(
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
+      index: true 
     },
 
     tags: {
@@ -70,6 +71,6 @@ const noteSchema = new Schema<INote>(
   {
     timestamps: true
   }
-)
+);
 
-export const Note = mongoose.model<INote>("Note", noteSchema)
+export const Note = mongoose.model<INote>("Note", noteSchema);

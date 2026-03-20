@@ -1,24 +1,28 @@
 import { Document, Types } from "mongoose";
 
 export interface INote extends Document {
+  _id: Types.ObjectId; 
 
-  title?: string
-  content: string
+  title?: string;
+  content: string;
 
-  owner: Types.ObjectId
+  owner: Types.ObjectId;
 
-  tags?: string[]
+  tags: string[];
 
-  backgroundColor?: string
-  backgroundImage?: string
+  backgroundColor: string;
+  backgroundImage?: string;
 
-  links?: string[]
-  images?: string[]
-  audio?: string[]
+  links: string[];
+  images: string[];
+  audio: string[];
 
-  isPinned?: boolean
-  isQuickNote? : boolean
+  isPinned: boolean;
+  isQuickNote: boolean;
 
-  isDeleted?: boolean
-  deletedAt?: Date
+  isDeleted: boolean;
+  deletedAt?: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
