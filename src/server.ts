@@ -15,7 +15,7 @@ app.use(clerkMiddleware());
 
 // Routes
 app.use("/api/notes", notesRoutes);
-
+app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

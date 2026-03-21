@@ -10,3 +10,12 @@ export const createNoteService = async (
     owner: userId,
   });
 };
+
+export const getNoteService = async (
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.find({
+    owner: userId,
+    isDeleted: false, 
+  });
+};
