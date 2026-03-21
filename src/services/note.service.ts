@@ -71,3 +71,63 @@ export const restoreNoteService = async (
     { new: true }
   );
 };
+
+
+export const getSingleNoteService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.findOne({
+    _id: noteId,
+    owner: userId,
+    isDeleted: false,
+  });
+};
+
+export const togglePinService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId
+) => {
+  const note = await Note.findOne({
+    _id: noteId,
+    owner: userId,
+  });
+
+  if (!note) return null;
+
+  note.isPinned = !note.isPinned;
+  return await note.save();
+};
+
+export const getNoteServicefilter = async (
+  userId: mongoose.Types.ObjectId,
+  query: any
+) => {
+  const filter: any = {
+    owner: userId,
+    isDeleted: false,
+  };
+
+  if (query.isPinned) {
+    filter.isPinned = query.isPinned === "true";
+  }
+
+  if (query.search) {
+    filter.$or = [
+      { title: { $regex: query.search, $options: "i" } },
+      { content: { $regex: query.search, $options: "i" } },
+    ];
+  }
+
+  return await Note.find(filter).sort({ createdAt: -1 });
+};
+
+export const permanentDeleteService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.findOneAndDelete({
+    _id: noteId,
+    owner: userId,
+  });
+};

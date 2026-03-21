@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNotes, deleteNotes, getNotes, updateNotes } from "../controller/note.controller";
+import { createNotes, deleteNotes, getNotes, getSingleNote, restoreNotes, updateNotes } from "../controller/note.controller";
 import { requireAuth } from "@clerk/express";
 
 const router = Router();
@@ -10,5 +10,8 @@ router.post("/", createNotes);
 router.get("/",getNotes)
 router.patch("/:id", updateNotes);
 router.delete("/:id", deleteNotes);
+router.patch("/:id/restore", restoreNotes);
+
+router.get("/:id", getSingleNote);
 
 export default router;

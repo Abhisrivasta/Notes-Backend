@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getCurrentUser } from "../utils/getCurrentUser";
-import { createNoteService, deleteNoteService, getNoteService, updateNoteService } from "../services/note.service";
+import { createNoteService, deleteNoteService, getNoteService, getSingleNoteService, restoreNoteService, updateNoteService } from "../services/note.service";
 
 
 //createNotes
@@ -199,3 +199,108 @@ export const deleteNotes = async (
   }
 };
 
+
+
+export const restoreNotes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const clerkId = "user_123"; // temp
+
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const restoredNote = await restoreNoteService(
+      id,
+      user._id
+    );
+
+    if (!restoredNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found or not deleted",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note restored successfully",
+      data: restoredNote,
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
+export const getSingleNote = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const clerkId = "user_123"; // temp
+
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const note = await getSingleNoteService(id, user._id);
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note fetched successfully",
+      data: note,
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
