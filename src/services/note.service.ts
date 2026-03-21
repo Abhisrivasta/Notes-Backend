@@ -19,3 +19,20 @@ export const getNoteService = async (
     isDeleted: false, 
   });
 };
+
+export const updateNoteService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId,
+  data: any
+) => {
+  return await Note.findOneAndUpdate(
+    {
+      _id: noteId,
+      owner: userId,
+      isDeleted: false,
+    },
+    data,
+    { new: true },
+  );
+};
+
