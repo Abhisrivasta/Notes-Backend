@@ -35,4 +35,39 @@ export const updateNoteService = async (
     { new: true },
   );
 };
+export const deleteNoteService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.findOneAndUpdate(
+    {
+      _id: noteId,
+      owner: userId,
+      isDeleted: false,
+    },
+    {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+    { new: true }
+  );
+};
 
+
+export const restoreNoteService = async (
+  noteId: string,
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.findOneAndUpdate(
+    {
+      _id: noteId,
+      owner: userId,
+      isDeleted: true,
+    },
+    {
+      isDeleted: false,
+      deletedAt: null,
+    },
+    { new: true }
+  );
+};

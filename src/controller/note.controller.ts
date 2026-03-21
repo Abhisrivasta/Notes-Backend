@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { getCurrentUser } from "../utils/getCurrentUser";
-import { createNoteService, getNoteService, updateNoteService } from "../services/note.service";
+import { createNoteService, deleteNoteService, getNoteService, updateNoteService } from "../services/note.service";
 
 
+//createNotes
 export const createNotes = async (
   req: Request,
   res: Response,
@@ -46,6 +47,8 @@ export const createNotes = async (
   }
 };
 
+
+//GetNotes
 export const getNotes = async (
   req: Request,
   res: Response,
@@ -89,6 +92,8 @@ export const getNotes = async (
 };
 
 
+
+//updateNotes
 export const updateNotes = async (
   req: Request,
   res: Response,
@@ -141,3 +146,56 @@ export const updateNotes = async (
     });
   }
 };
+export const deleteNotes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const clerkId = "user_123"; 
+
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const deletedNote = await deleteNoteService(
+      id,
+      user._id
+    );
+
+    if (!deletedNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note deleted successfully",
+      data: deletedNote, // optional but useful
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
