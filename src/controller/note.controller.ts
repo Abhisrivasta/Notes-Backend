@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getCurrentUser } from "../utils/getCurrentUser";
-import { createNoteService, deleteNoteService, getNoteService, getSingleNoteService, restoreNoteService, updateNoteService } from "../services/note.service";
+import { createNoteService, deleteNoteService, getNoteService, getSingleNoteService, restoreNoteService, togglePinService, updateNoteService } from "../services/note.service";
 
 
 //createNotes
@@ -55,8 +55,7 @@ export const getNotes = async (
   next: NextFunction
 ) => {
   try {
-    // const clerkId = (req as any).auth?.userId;
-    const clerkId = "user_123";
+    const clerkId = "user_123"; // replace with real auth
 
     if (!clerkId) {
       return res.status(401).json({
@@ -74,12 +73,57 @@ export const getNotes = async (
       });
     }
 
-    const notes = await getNoteService(user._id);
+    const {
+      search,
+      tag,
+      pinned,
+      page = "1",
+      limit = "10",
+    } = req.query;
+
+    //  Base filter
+    const filter: any = {
+      owner: user._id,
+      isDeleted: false,
+    };
+
+    //  Pinned filter
+    if (pinned === "true") {
+      filter.isPinned = true;
+    }
+
+    // Tag filter (single)
+    if (tag) {
+      filter.tags = { $in: [tag] };
+    }
+
+    // Search filter
+    if (search && typeof search === "string" && search.trim() !== "") {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Pagination
+    const pageNumber = Math.max(1, parseInt(page as string) || 1);
+    const limitNumber = Math.max(1, parseInt(limit as string) || 10);
+
+    const result = await getNoteService(
+      filter,
+      pageNumber,
+      limitNumber
+    );
 
     return res.status(200).json({
       success: true,
       message: "Notes fetched successfully",
-      data: notes,
+      data: result.notes,
+      meta: {
+        total: result.total,
+        page: result.page,
+        totalPages: result.totalPages,
+      },
     });
 
   } catch (error) {
@@ -90,7 +134,6 @@ export const getNotes = async (
     });
   }
 };
-
 
 
 //updateNotes
@@ -200,7 +243,7 @@ export const deleteNotes = async (
 };
 
 
-
+//restore notes
 export const restoreNotes = async (
   req: Request,
   res: Response,
@@ -255,6 +298,8 @@ export const restoreNotes = async (
 };
 
 
+
+//get single notes
 export const getSingleNote = async (
   req: Request,
   res: Response,
@@ -304,3 +349,57 @@ export const getSingleNote = async (
     });
   }
 };
+
+
+
+//toggle notes
+export const togglePin = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const clerkId = "user_123"; // temp
+
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const note = await togglePinService(id, user._id);
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Pin status toggled",
+      data: note,
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+

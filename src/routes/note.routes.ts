@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNotes, deleteNotes, getNotes, getSingleNote, restoreNotes, updateNotes } from "../controller/note.controller";
+import { createNotes, deleteNotes, getNotes, getSingleNote, restoreNotes, togglePin, updateNotes } from "../controller/note.controller";
 import { requireAuth } from "@clerk/express";
 
 const router = Router();
@@ -13,5 +13,6 @@ router.delete("/:id", deleteNotes);
 router.patch("/:id/restore", restoreNotes);
 
 router.get("/:id", getSingleNote);
+router.patch("/:id/toggle-pin", togglePin);
 
 export default router;

@@ -12,14 +12,25 @@ export const createNoteService = async (
 };
 
 export const getNoteService = async (
-  userId: mongoose.Types.ObjectId
+  filter: any,
+  page: number,
+  limit: number
 ) => {
-  return await Note.find({
-    owner: userId,
-    isDeleted: false, 
-  });
-};
+  const notes = await Note.find(filter)
+    .sort({ isPinned: -1, createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
+  const total = await Note.countDocuments(filter);
+
+  return {
+    notes,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
+};
 export const updateNoteService = async (
   noteId: string,
   userId: mongoose.Types.ObjectId,
@@ -91,6 +102,7 @@ export const togglePinService = async (
   const note = await Note.findOne({
     _id: noteId,
     owner: userId,
+    isDeleted : false
   });
 
   if (!note) return null;
@@ -99,28 +111,6 @@ export const togglePinService = async (
   return await note.save();
 };
 
-export const getNoteServicefilter = async (
-  userId: mongoose.Types.ObjectId,
-  query: any
-) => {
-  const filter: any = {
-    owner: userId,
-    isDeleted: false,
-  };
-
-  if (query.isPinned) {
-    filter.isPinned = query.isPinned === "true";
-  }
-
-  if (query.search) {
-    filter.$or = [
-      { title: { $regex: query.search, $options: "i" } },
-      { content: { $regex: query.search, $options: "i" } },
-    ];
-  }
-
-  return await Note.find(filter).sort({ createdAt: -1 });
-};
 
 export const permanentDeleteService = async (
   noteId: string,
