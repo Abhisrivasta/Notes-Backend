@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getCurrentUser } from "../utils/getCurrentUser";
-import { createNoteService, deleteNoteService, getNoteService, getSingleNoteService, restoreNoteService, togglePinService, updateNoteService } from "../services/note.service";
+import { bulkPermanentDeleteService, bulkRestoreService, bulkSoftDeleteService, createNoteService, deleteNoteService, getNoteService, getSingleNoteService, permanentDeleteService, restoreNoteService, togglePinService, updateNoteService } from "../services/note.service";
 
 
 //createNotes
@@ -403,3 +403,188 @@ export const togglePin = async (
 };
 
 
+//delete notes
+export const permanentDeleteNote = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const clerkId = "user_123"; // temp
+
+    if (!clerkId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const deletedNote = await permanentDeleteService(
+      id,
+      user._id
+    );
+
+    if (!deletedNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found or not in trash",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note permanently deleted",
+    });
+
+  } catch (error) {
+    console.error("ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
+export const bulkRestoreNotes = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const clerkId = "user_123";
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid IDs array",
+      });
+    }
+
+    const result = await bulkRestoreService(ids, user._id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes restored successfully",
+      modifiedCount: result.modifiedCount,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
+export const bulkDeleteNotes = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const clerkId = "user_123";
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid IDs array",
+      });
+    }
+
+    const result = await bulkPermanentDeleteService(
+      ids,
+      user._id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes permanently deleted",
+      deletedCount: result.deletedCount,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
+
+export const bulkSoftDeleteNotes = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const clerkId = "user_123"; // temp
+
+    const user = await getCurrentUser(clerkId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { ids } = req.body;
+
+    // 🔥 Validation (must have this)
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid IDs array",
+      });
+    }
+
+    const result = await bulkSoftDeleteService(
+      ids,
+      user._id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes moved to trash",
+      modifiedCount: result.modifiedCount,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

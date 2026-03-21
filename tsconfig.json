@@ -39,6 +39,6 @@
     "forceConsistentCasingInFileNames":true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "cron.ts"],
   "exclude": ["node_modules","dist"]
 }

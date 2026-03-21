@@ -119,5 +119,53 @@ export const permanentDeleteService = async (
   return await Note.findOneAndDelete({
     _id: noteId,
     owner: userId,
+    isDeleted: true, 
   });
+};
+
+export const bulkRestoreService = async (
+  ids: string[],
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.updateMany(
+    {
+      _id: { $in: ids },
+      owner: userId,
+      isDeleted: true, 
+    },
+    {
+      isDeleted: false,
+      deletedAt: null,
+    }
+  );
+};
+
+
+export const bulkPermanentDeleteService = async (
+  ids: string[],
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.deleteMany({
+    _id: { $in: ids },
+    owner: userId,
+    isDeleted: true, 
+  });
+};
+
+
+export const bulkSoftDeleteService = async (
+  ids: string[],
+  userId: mongoose.Types.ObjectId
+) => {
+  return await Note.updateMany(
+    {
+      _id: { $in: ids },
+      owner: userId,
+      isDeleted: false, 
+    },
+    {
+      isDeleted: true,
+      deletedAt: new Date(),
+    }
+  );
 };

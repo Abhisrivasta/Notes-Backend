@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/config";
 import { clerkMiddleware } from "@clerk/express";
 import notesRoutes from "./routes/note.routes";
-
+import "./jobs/cron"
 // Load env FIRST
 dotenv.config();
 
